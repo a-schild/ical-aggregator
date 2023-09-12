@@ -1,0 +1,11 @@
+{
+    "name": "iCalAggregator",
+    "version": "1.0.0",
+    "keywords": ["aggregator", "ics", "server", "icalendar", "ical"],
+    "author": "a.schild",
+    "contributors": [],
+    "dependencies": {
+        "ical.js": "^1.5.0",
+        "pino": "^8.0.0"
+    }
+}

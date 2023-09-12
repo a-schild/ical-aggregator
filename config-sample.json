@@ -1,0 +1,35 @@
+{
+    "config_calset1": {
+        "inputs": [
+            {
+                "src" : "https://server11/calendar.ics",
+                "description" : "Calendar 11",
+                "_newLocation" : "New location for calendar 11 entries"
+            },
+            {
+                "src" : "https://server12/calendar.ics",
+                "description" : "Calendar 12",
+                "_newLocation" : "New location for calendar 12 entries"
+            }
+        ],
+        "output": {
+            "fileName": "F:/x/calset1.ics"
+        }
+    },
+    "config_calset2": {
+        "inputs": [
+            {
+                "src" : "https://server21/calendar.ics",
+                "description" : "Calendar 21",
+                "_newLocation" : "New location for calendar 21 entries"
+            },
+            {
+                "src" : "https://server22/calendar.ics",
+                "description" : "Calendar 22",
+                "_newLocation" : "New location for calendar 22 entries"
+            },
+        "output": {
+            "fileName": "F:/x/calset2.ics"
+        }
+    }
+}
