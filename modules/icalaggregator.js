@@ -71,13 +71,17 @@ class IcalAggregator {
         this.logger.debug(singleConfig.output);
         this.allProcessed= [];
 
+        let comp = new ICAL.Component(['vcalendar', [], []]);
+        comp.updatePropertyWithValue('prodid', '-//iCal.js churchtool calendar merger');
+        comp.updatePropertyWithValue('version', '2.0');
+        comp.updatePropertyWithValue('calscale', 'GREGORIAN');
+
         if (this.writeToStdOut) {
             for (let ls of singleConfig.inputs) {
                 await this.loadCalendarFromSource(ls, key);
             }
             this.logger.debug("All calendars processed");
-            let comp = new ICAL.Component(['vcalendar', [], []]);
-            comp.updatePropertyWithValue('prodid', '-//iCal.js churchtool calendar merger');
+
             for (const srcEvent of this.newCalendarContent[key]) {
                 // Add the new component
                 comp.addSubcomponent(srcEvent);
@@ -95,8 +99,6 @@ class IcalAggregator {
             //this.logger.debug("Values: "+values);
             //this.logger.debug(this.newCalendarContent[key]);
 
-            let comp = new ICAL.Component(['vcalendar', [], []]);
-            comp.updatePropertyWithValue('prodid', '-//iCal.js churchtool calendar merger');
             for (const srcEvent of this.newCalendarContent[key]) {
                 // Add the new component
                 comp.addSubcomponent(srcEvent);
