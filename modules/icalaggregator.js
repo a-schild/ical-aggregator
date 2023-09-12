@@ -27,8 +27,8 @@ class IcalAggregator {
     constructor(configKey, writeToStdOut) {
         // Init logger
         this.logger = pino({
-          level: 'info'
-          //level: 'debug'
+          //level: 'info'
+          level: 'debug'
         });
 
         // this.logger.error("Calling constructor");

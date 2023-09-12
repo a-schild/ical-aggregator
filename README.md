@@ -45,3 +45,7 @@ The calendars are processed and writen to the outfiles as defined in the config.
 ## Validating results
 Upload the generated files here
 https://icalendar.org/validator.html
+
+
+## ical library used
+https://github.com/kewisch/ical.js

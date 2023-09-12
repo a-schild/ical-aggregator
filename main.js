@@ -47,8 +47,10 @@ function processCalendarSet(key, singleConfig) {
 
         let comp = new ICAL.Component(['vcalendar', [], []]);
         comp.updatePropertyWithValue('prodid', '-//iCal.js churchtool calendar merger');
+        comp.updatePropertyWithValue('version', '2.0');
+        comp.updatePropertyWithValue('calscale', 'GREGORIAN');
         for (const srcEvent of newCalendarContent[key]) {
-            // Add the new component
+            // Add the new components
             comp.addSubcomponent(srcEvent);
         }
         // logger.debug("Output to: "+config.output);
