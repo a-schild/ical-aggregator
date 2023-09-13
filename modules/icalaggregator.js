@@ -109,7 +109,7 @@ class IcalAggregator {
                 this.retVal= comp.toString();
             } else {
                 this.logger.debug("Output to file: "+singleConfig.output.fileName);
-                fs.writeFile(singleConfig.output.fileName, comp.toString(), err => {
+                fs.writeFile(singleConfig.output.fileName, this.fixFullDayEvents(comp.toString()), err => {
                     if (err) {
                         console.error(err);
                         this.logger.error(err);
@@ -202,6 +202,11 @@ class IcalAggregator {
     
     getRetVal() {
         return this.retVal;
+    }
+    
+    fixFullDayEvents(sourceIcal) {
+        let r1Result= sourceIcal.replace(/DTSTART:(\d\d\d\d)-(\d\d)-(\d\d)T::/gm, "DTSTART:$1$2$3");
+        return r1Result.replace(/DTEND:(\d\d\d\d)-(\d\d)-(\d\d)T::/gm, "DTEND:$1$2$3");
     }
 }
 

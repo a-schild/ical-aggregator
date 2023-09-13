@@ -55,7 +55,9 @@ function processCalendarSet(key, singleConfig) {
         }
         // logger.debug("Output to: "+config.output);
         logger.info("Output to: "+singleConfig.output.fileName);
-        fs.writeFile(singleConfig.output.fileName, comp.toString(), err => {
+        let origSource= comp.toString();
+        
+        fs.writeFile(singleConfig.output.fileName, fixFullDayEvents(origSource), err => {
             if (err) {
                 console.error(err);
             }
@@ -139,3 +141,9 @@ function httpGet(url) {
     });
   });
 }
+
+function fixFullDayEvents(sourceIcal) {
+    let r1Result= sourceIcal.replace(/DTSTART:(\d\d\d\d)-(\d\d)-(\d\d)T::/gm, "DTSTART:$1$2$3");
+    return r1Result.replace(/DTEND:(\d\d\d\d)-(\d\d)-(\d\d)T::/gm, "DTEND:$1$2$3");
+}
+

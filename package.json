@@ -7,5 +7,9 @@
     "dependencies": {
         "ical.js": "^1.5.0",
         "pino": "^8.0.0"
+    },
+    "scripts": {
+        "start": "node main.js"
     }
+
 }
