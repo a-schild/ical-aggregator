@@ -88,7 +88,7 @@ class IcalAggregator {
             }
             // this.logger.debug("Output to: "+config.output);
             this.logger.debug("Output to console");
-            this.retVal= comp.toString();
+            this.retVal= this.fixFullDayEvents(comp.toString());
         } else {
             for (let ls of singleConfig.inputs) {
                 this.allProcessed.push(this.loadCalendarFromSource(ls, key));            
