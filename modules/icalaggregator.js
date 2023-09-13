@@ -106,7 +106,7 @@ class IcalAggregator {
             // this.logger.debug("Output to: "+config.output);
             if (this.writeToStdOut) {
                 this.logger.debug("Output to console");
-                this.retVal= comp.toString();
+                this.retVal= this.fixFullDayEvents(comp.toString());
             } else {
                 this.logger.debug("Output to file: "+singleConfig.output.fileName);
                 fs.writeFile(singleConfig.output.fileName, this.fixFullDayEvents(comp.toString()), err => {
