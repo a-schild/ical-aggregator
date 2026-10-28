@@ -7,6 +7,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Security
+- `scripts/update.sh` keeps its backups in the root-only directory `/var/backups/ical-aggregator`
+  instead of a predictable path in the world-writable `/var/tmp`. There, another local user could
+  have read the backed up `config.json` (feed tokens) or planted files that are restored as root
+  on a rollback.
+
 ## [1.1.0] - 2026-10-28
 
 ### Added

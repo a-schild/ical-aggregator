@@ -100,7 +100,8 @@ release.yml.
 
 The server installs releases with `scripts/update.sh [X.Y.Z] [--force]` (run as root). It uses the
 public GitHub API without a token, `node` instead of `jq` to parse JSON, keeps `config.json`,
-backs up to `/var/tmp`, runs `npm ci --omit=dev`, restarts the service and rolls back if
+backs up to `/var/backups/ical-aggregator/<mktemp dir>` (root 700, never `/var/tmp`: the backup holds
+the tokens and is restored as root), runs `npm ci --omit=dev`, restarts the service and rolls back if
 `http://127.0.0.1:3000/` doesn't answer 404. It only warns about pending `nodejs` apt updates,
 because the Node runtime is shared with other services on that host (kgn-reservations).
 It also creates the `ical-aggregator` system user (nologin), sets `config.json` to

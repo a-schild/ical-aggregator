@@ -80,7 +80,7 @@ Run as root:
 /opt/ical-aggregator/scripts/update.sh 1.1.0    # a given release
 /opt/ical-aggregator/scripts/update.sh --force  # reinstall the installed version
 ```
-The script backs up the current install to `/var/tmp/ical-aggregator-backup-*`, installs the
+The script backs up the current install to `/var/backups/ical-aggregator/` (root only), installs the
 release (`config.json` is kept), runs `npm ci --omit=dev`, creates the `ical-aggregator` user if
 needed, installs the systemd unit if it changed and restarts the service. If the service does not
 answer afterwards, it restores the backup, including the previous unit. It also warns when a newer `nodejs` package

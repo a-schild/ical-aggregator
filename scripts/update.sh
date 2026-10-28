@@ -20,6 +20,7 @@ SERVICE="${SERVICE:-ical-aggregator}"
 # System user the service runs as (no login shell), see systemd/ical-aggregator.service
 SERVICE_USER="ical-aggregator"
 UNIT_FILE="/etc/systemd/system/${SERVICE}.service"
+BACKUP_ROOT="/var/backups/ical-aggregator"
 HEALTH_URL="http://127.0.0.1:3000/"
 
 VERSION=""
@@ -101,13 +102,20 @@ NEW_DIR="$WORK_DIR/ical-aggregator"
 BACKUP_DIR=""
 CONFIG_PERMS=""
 if [ -d "$INSTALL_DIR" ]; then
-    BACKUP_DIR="/var/tmp/ical-aggregator-backup-${INSTALLED:-unknown}-$(date +%Y%m%d-%H%M%S)"
+    # Root-only directory, not /var/tmp: the backup contains config.json with the feed tokens,
+    # and root restores it on rollback, so no other user may be able to touch it
+    [ -L "$BACKUP_ROOT" ] && fail "$BACKUP_ROOT is a symlink"
+    install -d -m 700 -o root -g root "$BACKUP_ROOT"
+    [ "$(stat -c '%U %a' "$BACKUP_ROOT")" = "root 700" ] || fail "$BACKUP_ROOT must be owned by root with mode 700"
+    BACKUP_DIR="$(mktemp -d "$BACKUP_ROOT/${INSTALLED:-unknown}-$(date +%Y%m%d-%H%M%S)-XXXXXX")"
     log "Backup to $BACKUP_DIR"
-    cp -a "$INSTALL_DIR" "$BACKUP_DIR"
-    # Backup dir contains config.json with the feed tokens
-    chmod 700 "$BACKUP_DIR"
-    [ -f "$UNIT_FILE" ] && cp -a "$UNIT_FILE" "$BACKUP_DIR.service"
-    [ -f "$INSTALL_DIR/config.json" ] && CONFIG_PERMS="$(stat -c '%U:%G %a' "$INSTALL_DIR/config.json")"
+    cp -a "$INSTALL_DIR" "$BACKUP_DIR/app"
+    if [ -f "$UNIT_FILE" ]; then
+        cp -a "$UNIT_FILE" "$BACKUP_DIR/unit.service"
+    fi
+    if [ -f "$INSTALL_DIR/config.json" ]; then
+        CONFIG_PERMS="$(stat -c '%U:%G %a' "$INSTALL_DIR/config.json")"
+    fi
 fi
 
 rollback() {
@@ -115,15 +123,15 @@ rollback() {
         fail "$1 (no backup to roll back to)"
     fi
     echo "[update] ERROR: $1, restoring $BACKUP_DIR" >&2
-    rsync -a --delete "$BACKUP_DIR/" "$INSTALL_DIR/"
+    rsync -a --delete "$BACKUP_DIR/app/" "$INSTALL_DIR/"
     chmod 755 "$INSTALL_DIR"
     # The old unit may run as another user, it must still be able to read config.json
     if [ -n "$CONFIG_PERMS" ]; then
         chown "${CONFIG_PERMS% *}" "$INSTALL_DIR/config.json"
         chmod "${CONFIG_PERMS#* }" "$INSTALL_DIR/config.json"
     fi
-    if [ -f "$BACKUP_DIR.service" ]; then
-        cp -a "$BACKUP_DIR.service" "$UNIT_FILE"
+    if [ -f "$BACKUP_DIR/unit.service" ]; then
+        cp -a "$BACKUP_DIR/unit.service" "$UNIT_FILE"
         systemctl daemon-reload
     fi
     systemctl restart "$SERVICE" || true
