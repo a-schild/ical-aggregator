@@ -7,6 +7,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-28
+
+### Changed
+- Build pipeline uses `actions/checkout` 7 and `actions/setup-node` 7.
+
 ### Security
 - `scripts/update.sh` keeps its backups in the root-only directory `/var/backups/ical-aggregator`
   instead of a predictable path in the world-writable `/var/tmp`. There, another local user could
