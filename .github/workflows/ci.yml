@@ -1,0 +1,25 @@
+name: CI
+
+# Syntax check, smoke tests and security audit on every push and PR.
+# Separate from release.yml (which runs only on version tags).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'       # same major as the production server (Debian 13)
+          cache: npm
+      - run: npm ci
+      - name: Syntax check
+        run: npm run check
+      - name: Test
+        run: npm test
+      - name: Security audit (runtime dependencies)
+        run: npm audit --omit=dev --audit-level=high

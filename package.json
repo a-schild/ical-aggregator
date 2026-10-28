@@ -1,15 +1,27 @@
 {
     "name": "iCalAggregator",
-    "version": "1.0.0",
-    "keywords": ["aggregator", "ics", "server", "icalendar", "ical"],
+    "version": "1.1.0",
+    "private": true,
+    "keywords": [
+        "aggregator",
+        "ics",
+        "server",
+        "icalendar",
+        "ical"
+    ],
     "author": "a.schild",
     "contributors": [],
+    "engines": {
+        "node": ">=20"
+    },
     "dependencies": {
-        "ical.js": "^1.5.0",
-        "pino": "^8.0.0"
+        "ical.js": "^2.2.1",
+        "pino": "^10.4.0"
     },
     "scripts": {
-        "start": "node main.js"
+        "start": "node main.js",
+        "server": "node server.js",
+        "check": "node --check main.js && node --check server.js && node --check modules/icalaggregator.js && node --check test/server.test.js",
+        "test": "node --test"
     }
-
 }

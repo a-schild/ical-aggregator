@@ -71,7 +71,8 @@ function processCalendarSet(key, singleConfig) {
 // and start processing entries
 //
 async function loadSource(source, key) {    
-    logger.info("Reading ics file from: "+source.src);
+    // Don't log source.src at info level, the url contains the security token
+    logger.info("Reading ics file: "+source.description);
     var buf = await httpGet(source.src);
     var calContent= buf.toString('utf-8');
     // logger.debug(calContent);
@@ -122,7 +123,13 @@ function httpGet(url) {
       client = https;
     }
 
-    client.get(url, (resp) => {
+    const req = client.get(url, { timeout: 30000 }, (resp) => {
+      // Error pages (e.g. html) must not end up in the merged calendar
+      if (resp.statusCode !== 200) {
+        resp.resume();
+        req.destroy(new Error("HTTP status " + resp.statusCode));
+        return;
+      }
       let chunks = [];
 
       // A chunk of data has been recieved.
@@ -135,8 +142,12 @@ function httpGet(url) {
         resolve(Buffer.concat(chunks));
       });
 
-    }).on("error", (err) => {
-        logger.error("Error in retrieving calendar from ["+url+"] "+err);
+    });
+    req.on("timeout", () => {
+      req.destroy(new Error("Timeout after 30000ms"));
+    });
+    req.on("error", (err) => {
+        logger.error("Error in retrieving calendar from ["+url.toString().replace(/security=[^&]*/, "security=***")+"] "+err);
       reject(err);
     });
   });

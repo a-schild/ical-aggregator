@@ -27,7 +27,8 @@
                 "src" : "https://server22/calendar.ics",
                 "description" : "Calendar 22",
                 "_newLocation" : "New location for calendar 22 entries"
-            },
+            }
+        ],
         "output": {
             "fileName": "F:/x/calset2.ics"
         }

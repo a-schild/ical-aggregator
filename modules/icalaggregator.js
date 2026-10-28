@@ -14,6 +14,8 @@ const ICAL= require("ical.js");
 const pino = require('pino');
 const fs = require('fs');
 
+// Max time to wait for a source calendar (connect or between received data)
+const HTTP_TIMEOUT_MS = 30000;
 
 
 class IcalAggregator {
@@ -27,8 +29,8 @@ class IcalAggregator {
     constructor(configKey, writeToStdOut) {
         // Init logger
         this.logger = pino({
-          //level: 'info'
-          level: 'debug'
+          level: 'info'
+          //level: 'debug'
         });
 
         // this.logger.error("Calling constructor");
@@ -52,7 +54,7 @@ class IcalAggregator {
 
     async processAllCalendars() {
         for (let key in this.configData) {
-            if (typeof this.configKey === 'undefined' || this.configKey === key) {
+            if (this.configKey == null || this.configKey === key) {
                 this.logger.debug("Processing ["+key+"]");
                 this.newCalendarContent[key]= [];
                 let singleConfig= this.configData[key];
@@ -115,8 +117,10 @@ class IcalAggregator {
                         this.logger.error(err);
                     }
                     // file written successfully
-                });    
+                });
             }
+        }).catch((err) => {
+            this.logger.error("Calendar set ["+key+"] not written: "+err);
         });
         this.logger.info("Finished processall");
     }
@@ -126,7 +130,8 @@ class IcalAggregator {
     // and start processing entries
     //
     async loadCalendarFromSource(source, key) {    
-        this.logger.info("Reading ics file from: "+source.src);
+        // Don't log source.src at info level, the url contains the security token
+        this.logger.info("Reading ics file: "+source.description);
         var buf = await this.httpGet(source.src);
         var calContent= buf.toString('utf-8');
         this.logger.debug("Calendar content: "+calContent);
@@ -180,7 +185,13 @@ class IcalAggregator {
           client = https;
         }
 
-        client.get(url, (resp) => {
+        const req = client.get(url, { timeout: HTTP_TIMEOUT_MS }, (resp) => {
+          // Error pages (e.g. html) must not end up in the merged calendar
+          if (resp.statusCode !== 200) {
+            resp.resume();
+            req.destroy(new Error("HTTP status " + resp.statusCode));
+            return;
+          }
           let chunks = [];
 
           // A chunk of data has been recieved.
@@ -193,13 +204,24 @@ class IcalAggregator {
             resolve(Buffer.concat(chunks));
           });
 
-        }).on("error", (err) => {
-            this.logger.error("Error in retrieving calendar from ["+url+"] "+err);
+        });
+        req.on("timeout", () => {
+          req.destroy(new Error("Timeout after " + HTTP_TIMEOUT_MS + "ms"));
+        });
+        req.on("error", (err) => {
+            this.logger.error("Error in retrieving calendar from ["+url.toString().replace(/security=[^&]*/, "security=***")+"] "+err);
           reject(err);
         });
       });
     }
-    
+
+    //
+    // Does the config.json contain this config key?
+    //
+    hasConfig(key) {
+        return Object.prototype.hasOwnProperty.call(this.configData, key);
+    }
+
     getRetVal() {
         return this.retVal;
     }
