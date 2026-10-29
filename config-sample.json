@@ -1,5 +1,7 @@
 {
     "config_calset1": {
+        "mergeRooms": false,
+        "roomNamesOnly": false,
         "inputs": [
             {
                 "src" : "https://server11/calendar.ics",

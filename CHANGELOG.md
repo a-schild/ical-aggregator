@@ -7,6 +7,20 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Added
+- New config set option `mergeRooms`: bookings of several rooms for the same event (same title,
+  start and end) are merged into one event that lists all rooms as location, with the shared
+  address only once (`Foyer, Küche – Matthäus-Zentrum, Lohngasse 4, 2562 Port`). This also removes
+  events that ChurchTools exports twice with the same UID, which made the ChurchTools import
+  create a new copy every night.
+- New config set option `roomNamesOnly`: the location of every event is cut to the room name
+  (`Foyer` instead of `Foyer, Matthäus-Zentrum, Lohngasse 4, 2562 Port`). With `mergeRooms`,
+  merged events list only their rooms (`Foyer, Küche`).
+
+### Fixed
+- Web service: the events of a calendar were added to the output a second time after all
+  sources were loaded. It had no visible effect so far, but would have doubled merged events.
+
 ## [1.1.1] - 2026-10-28
 
 ### Changed

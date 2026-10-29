@@ -16,7 +16,7 @@ npm ci               # install dependencies (ical.js, pino)
 node main.js         # batch mode (= npm start): process every config set, write each to output.fileName
 node server.js       # HTTP mode: http://127.0.0.1:3000/?config=<configKey> returns the merged ics
 npm run check        # node --check on all js files
-npm test             # smoke tests (node:test), test/server.test.js
+npm test             # node:test: test/server.test.js (smoke) + test/mergerooms.test.js (unit)
 node --test --test-name-pattern="502" # a single test by name
 ```
 
@@ -35,6 +35,9 @@ working directory**, so both entry points must be started from the repo root (th
 
 - `inputs[]`: `src` (http/https URL), `description`, optional `newLocation`. Keys prefixed with
   `_` (e.g. `_newLocation`) are effectively commented out, because the code only checks `newLocation`.
+- `mergeRooms` (optional, `true` to enable): merge the room bookings of the same event, see below.
+- `roomNamesOnly` (optional, `true` to enable): cut every LOCATION of the set to the part before
+  the first comma. It runs before `mergeRooms`, so merged events list only room names.
 - `output.fileName`: target file, used in batch mode only.
 
 `config.kgn.json` is an untracked real-world config containing feed tokens. Never commit it.
@@ -52,6 +55,13 @@ There are **two independent copies of the merge logic**, and they are not shared
   `Promise.all`. The server always passes `true`, and the class reads `config.json` again on each request.
 
 If you fix something in the merge pipeline, check whether it needs to go into both files.
+The exception is `modules/mergerooms.js` (`mergeRoomBookings()`, config set option
+`mergeRooms`), which both entry points require. It groups bookings by SUMMARY + DTSTART + DTEND
+(exact property text) and keeps the smallest UID. `joinLocations()` writes the trailing comma
+separated parts that all locations share (the address) once: `Foyer, Küche – <address>`.
+`roomNamesOnly()` lives there too. It never mutates its
+input. In stdout mode only the first branch of `processCalendarSet()` adds events; the
+`Promise.all` block is for file mode only. Running both added fresh merged components twice.
 
 `server.js` answers 404 for a missing or unknown `config` key and 502 if any source fails
 (non-200 status, unreachable, 30 s timeout, or unparsable content). It never sends an empty or
@@ -77,6 +87,10 @@ Production runs on `helpers.ref-nidau.ch` in `/opt/ical-aggregator` as a systemd
 behind Apache at `/ical-aggregator/`. Its real `config.json` points to `ref-nidau.church.tools`;
 the local `config.kgn.json` still has the old, dead `tools.ref-nidau.ch` URLs. ChurchTools imports
 the merged feeds itself, once a night at about 03:20 (for example into the "Belegung Ipsach" calendar).
+To inspect what ChurchTools gets, fetch the public URL
+`https://helpers.ref-nidau.ch/ical-aggregator/?config=<configKey>` (e.g. `config_ipsach`). The
+output holds no feed tokens. The `tools/collect` helper in the Aarboard infrastructure repo can't
+fetch it, and it must never fetch `/opt/ical-aggregator` (its `config.json` holds the tokens).
 
 `sample/ChurchTools.ics` is a sample source feed (the main upstream is ChurchTools), useful for
 manual testing.

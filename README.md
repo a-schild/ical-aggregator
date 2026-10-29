@@ -34,6 +34,23 @@ Each top level key is a calendar set with a list of `inputs` and an `output`:
 - `newLocation` (optional): replaces the location of all events of this source.
   The sample uses `_newLocation`, the leading `_` disables the setting.
 - `output.fileName`: target file, only used in batch mode
+- `mergeRooms` (optional, set level, default `false`): with `true`, bookings with the same title,
+  start and end are merged into one event whose location lists all rooms and the shared address
+  once, e.g. `Foyer, Küche – Matthäus-Zentrum, Lohngasse 4, 2562 Port`. A room whose location is
+  only the address is listed by its first part (`Matthäus-Zentrum`). Locations without a shared
+  address are joined in full with `; `.
+  ChurchTools exports one event per booked room, so an event in five rooms otherwise shows up five
+  times. The merged event keeps the smallest UID of its bookings (stable as long as that booking
+  exists), the newest `LAST-MODIFIED` and the highest `SEQUENCE`; different descriptions are joined.
+  Bookings with a different end time stay separate. Recurring events (`RRULE`/`RECURRENCE-ID`)
+  are never merged.
+  When you switch it on, the importing calendar removes the events of the other UIDs once and
+  updates the remaining one.
+- `roomNamesOnly` (optional, set level, default `false`): with `true`, the location of every event
+  of the set is cut to the room name, the part before the first comma
+  (`Foyer, Matthäus-Zentrum, Lohngasse 4, 2562 Port` → `Foyer`). Together with `mergeRooms` a
+  merged event lists only its rooms: `Matthäus-Zentrum, Foyer, Küche`. A `newLocation` is cut the
+  same way, so don't use commas in it.
 
 
 ## Running as webservice

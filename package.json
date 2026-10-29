@@ -21,7 +21,7 @@
     "scripts": {
         "start": "node main.js",
         "server": "node server.js",
-        "check": "node --check main.js && node --check server.js && node --check modules/icalaggregator.js && node --check test/server.test.js",
+        "check": "node --check main.js && node --check server.js && node --check modules/icalaggregator.js && node --check modules/mergerooms.js && node --check test/server.test.js && node --check test/mergerooms.test.js",
         "test": "node --test"
     }
 }

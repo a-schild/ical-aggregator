@@ -13,6 +13,7 @@
 const ICAL= require("ical.js");
 const pino = require('pino');
 const fs = require('fs');
+const { mergeRoomBookings, roomNamesOnly } = require('./modules/mergerooms.js');
 
 // Init logger
 const logger = pino({
@@ -49,7 +50,14 @@ function processCalendarSet(key, singleConfig) {
         comp.updatePropertyWithValue('prodid', '-//iCal.js churchtool calendar merger');
         comp.updatePropertyWithValue('version', '2.0');
         comp.updatePropertyWithValue('calscale', 'GREGORIAN');
-        for (const srcEvent of newCalendarContent[key]) {
+        let events= newCalendarContent[key];
+        if (singleConfig.roomNamesOnly === true) {
+            events= roomNamesOnly(events);
+        }
+        if (singleConfig.mergeRooms === true) {
+            events= mergeRoomBookings(events);
+        }
+        for (const srcEvent of events) {
             // Add the new components
             comp.addSubcomponent(srcEvent);
         }

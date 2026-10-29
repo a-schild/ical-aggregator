@@ -45,6 +45,23 @@ before(async () => {
             ],
             output: { fileName: 'good.ics' }
         },
+        merged: {
+            mergeRooms: true,
+            inputs: [
+                { src: src + '/ok?security=SECRET1&id=1', description: 'room 1' },
+                { src: src + '/ok?security=SECRET2&id=2', description: 'room 2', newLocation: 'New location' }
+            ],
+            output: { fileName: 'merged.ics' }
+        },
+        roomsonly: {
+            mergeRooms: true,
+            roomNamesOnly: true,
+            inputs: [
+                { src: src + '/ok?security=SECRET1&id=1', description: 'room 1', newLocation: 'Foyer, Zentrum, Street 1' },
+                { src: src + '/ok?security=SECRET2&id=2', description: 'room 2', newLocation: 'Küche, Zentrum, Street 1' }
+            ],
+            output: { fileName: 'roomsonly.ics' }
+        },
         bad: {
             inputs: [
                 { src: src + '/ok?security=SECRET1&id=1', description: 'room 1' },
@@ -108,6 +125,26 @@ test('merges all events of all sources', async () => {
     assert.strictEqual(events.length, 6);
     const locations = events.map((e) => e.getFirstPropertyValue('location'));
     assert.strictEqual(locations.filter((l) => l === 'New location').length, 3);
+});
+
+test('mergeRooms merges the bookings of both rooms', async () => {
+    const resp = await get('?config=merged');
+    assert.strictEqual(resp.status, 200);
+
+    const events = new ICAL.Component(ICAL.parse(resp.body)).getAllSubcomponents('vevent');
+    assert.strictEqual(events.length, 3);
+    const timed = events.find((e) => e.getFirstPropertyValue('uid') === 'timed-1@test.church.tools');
+    assert.strictEqual(timed.getFirstPropertyValue('location'), 'Room A, Test street 1, 2560 Nidau; New location');
+    assert.match(resp.body, /DTSTART;VALUE=DATE:20261219/);
+});
+
+test('roomNamesOnly lists only the rooms', async () => {
+    const resp = await get('?config=roomsonly');
+    assert.strictEqual(resp.status, 200);
+
+    const events = new ICAL.Component(ICAL.parse(resp.body)).getAllSubcomponents('vevent');
+    assert.strictEqual(events.length, 3);
+    assert.deepStrictEqual([...new Set(events.map((e) => e.getFirstPropertyValue('location')))], ['Foyer, Küche']);
 });
 
 test('keeps all day events as dates', async () => {

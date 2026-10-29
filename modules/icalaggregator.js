@@ -13,6 +13,7 @@
 const ICAL= require("ical.js");
 const pino = require('pino');
 const fs = require('fs');
+const { mergeRoomBookings, roomNamesOnly } = require('./mergerooms.js');
 
 // Max time to wait for a source calendar (connect or between received data)
 const HTTP_TIMEOUT_MS = 30000;
@@ -84,7 +85,7 @@ class IcalAggregator {
             }
             this.logger.debug("All calendars processed");
 
-            for (const srcEvent of this.newCalendarContent[key]) {
+            for (const srcEvent of this.getOutputEvents(key, singleConfig)) {
                 // Add the new component
                 comp.addSubcomponent(srcEvent);
             }
@@ -93,23 +94,18 @@ class IcalAggregator {
             this.retVal= this.fixFullDayEvents(comp.toString());
         } else {
             for (let ls of singleConfig.inputs) {
-                this.allProcessed.push(this.loadCalendarFromSource(ls, key));            
+                this.allProcessed.push(this.loadCalendarFromSource(ls, key));
             }
-        }
-        Promise.all(this.allProcessed).then((values) => {
-            this.logger.debug("All calendars processed");
-            //this.logger.debug("Values: "+values);
-            //this.logger.debug(this.newCalendarContent[key]);
+            // Only in file mode: in stdout mode the events are already added above
+            Promise.all(this.allProcessed).then((values) => {
+                this.logger.debug("All calendars processed");
+                //this.logger.debug("Values: "+values);
+                //this.logger.debug(this.newCalendarContent[key]);
 
-            for (const srcEvent of this.newCalendarContent[key]) {
-                // Add the new component
-                comp.addSubcomponent(srcEvent);
-            }
-            // this.logger.debug("Output to: "+config.output);
-            if (this.writeToStdOut) {
-                this.logger.debug("Output to console");
-                this.retVal= this.fixFullDayEvents(comp.toString());
-            } else {
+                for (const srcEvent of this.getOutputEvents(key, singleConfig)) {
+                    // Add the new component
+                    comp.addSubcomponent(srcEvent);
+                }
                 this.logger.debug("Output to file: "+singleConfig.output.fileName);
                 fs.writeFile(singleConfig.output.fileName, this.fixFullDayEvents(comp.toString()), err => {
                     if (err) {
@@ -118,11 +114,25 @@ class IcalAggregator {
                     }
                     // file written successfully
                 });
-            }
-        }).catch((err) => {
-            this.logger.error("Calendar set ["+key+"] not written: "+err);
-        });
+            }).catch((err) => {
+                this.logger.error("Calendar set ["+key+"] not written: "+err);
+            });
+        }
         this.logger.info("Finished processall");
+    }
+
+    //
+    // Events for the output, room bookings merged if the config set asks for it
+    //
+    getOutputEvents(key, singleConfig) {
+        let events= this.newCalendarContent[key];
+        if (singleConfig.roomNamesOnly === true) {
+            events= roomNamesOnly(events);
+        }
+        if (singleConfig.mergeRooms === true) {
+            events= mergeRoomBookings(events);
+        }
+        return events;
     }
 
     //
