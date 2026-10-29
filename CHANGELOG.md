@@ -7,6 +7,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-29
+
 ### Added
 - New config set option `mergeRooms`: bookings of several rooms for the same event (same title,
   start and end) are merged into one event that lists all rooms as location, with the shared
