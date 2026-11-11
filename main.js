@@ -103,11 +103,14 @@ async function loadSource(source, key) {
 function addJCalEven(calendarSrc, key, jCalEventData) {
     logger.debug("jcal src: "+calendarSrc.src+" key["+key+"]");
     logger.debug("vevent: "+jCalEventData);
-    var event = new ICAL.Event(jCalEventData); 
+    var event = new ICAL.Event(jCalEventData);
     // logger.debug("jcal new location: "+calendarSrc.newLocation);
     if (typeof calendarSrc.newLocation !== 'undefined') {
         logger.info("Updating location from ["+event.location+"] to ["+calendarSrc.newLocation+"]");
         event.location= calendarSrc.newLocation;
+    }
+    if (typeof calendarSrc.group !== 'undefined') {
+        jCalEventData.updatePropertyWithValue('x-ical-aggregator-group', calendarSrc.group);
     }
     logger.debug("jcal event data: "+jCalEventData);
     newCalendarContent[key].push(jCalEventData);

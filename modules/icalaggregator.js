@@ -167,11 +167,14 @@ class IcalAggregator {
 //        console.info("Event: "+jCalEventData);
         this.logger.debug("jcal src: "+calendarSrc.src+" key["+key+"]");
         this.logger.debug("vevent: "+jCalEventData);
-        var event = new ICAL.Event(jCalEventData); 
+        var event = new ICAL.Event(jCalEventData);
         this.logger.debug("jcal new location: "+calendarSrc.newLocation);
         if (typeof calendarSrc.newLocation !== 'undefined') {
             this.logger.info("Updating location from ["+event.location+"] to ["+calendarSrc.newLocation+"]");
             event.location= calendarSrc.newLocation;
+        }
+        if (typeof calendarSrc.group !== 'undefined') {
+            jCalEventData.updatePropertyWithValue('x-ical-aggregator-group', calendarSrc.group);
         }
 //        this.logger.debug("jcal event data: "+jCalEventData);
         this.newCalendarContent[key].push(jCalEventData);

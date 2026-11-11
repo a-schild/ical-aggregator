@@ -40,6 +40,16 @@ working directory**, so both entry points must be started from the repo root (th
   the first comma. It runs before `mergeRooms`, so merged events list only room names.
 - `output.fileName`: target file, used in batch mode only.
 
+Each entry in `inputs[]` accepts:
+- `src`: the calendar URL.
+- `description`: label used in log messages (never the URL — it carries the security token).
+- `newLocation` (optional): override every event's LOCATION from this source.
+- `group` (optional): tag events from this source with a group name. When `mergeRooms` is
+  enabled, only bookings that share the same `group` value are merged together. Inputs without
+  a `group` each form their own group and are not merged with any other input. This is useful
+  when sources from different buildings share the same config set — assigning `group` per
+  building prevents cross-building merges.
+
 `config.kgn.json` is an untracked real-world config containing feed tokens. Never commit it.
 
 ## Architecture

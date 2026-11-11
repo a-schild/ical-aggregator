@@ -27,7 +27,11 @@ function roomNamesOnly(events) {
 }
 
 //
-// events = array of ICAL.Component vevents (newLocation already applied)
+// events = array of ICAL.Component vevents (newLocation already applied).
+// When an event carries the internal x-ical-aggregator-group property (set by
+// icalaggregator.js / main.js from the input's "group" config field), bookings
+// are only merged with others from the same group. That property is stripped
+// from every returned component.
 // Returns a new array, the input components are not modified.
 //
 function mergeRoomBookings(events) {
@@ -40,6 +44,7 @@ function mergeRoomBookings(events) {
             continue;
         }
         const key = JSON.stringify([
+            event.getFirstPropertyValue('x-ical-aggregator-group') || '',
             event.getFirstPropertyValue('summary') || '',
             propertyText(event, 'dtstart'),
             propertyText(event, 'dtend')
@@ -53,7 +58,14 @@ function mergeRoomBookings(events) {
         }
         group.push(event);
     }
-    return result.map((group) => group.length === 1 ? group[0] : mergeGroup(group));
+    return result.map((group) => removeGroupTag(group.length === 1 ? group[0] : mergeGroup(group)));
+}
+
+function removeGroupTag(event) {
+    if (!event.hasProperty('x-ical-aggregator-group')) return event;
+    const copy = clone(event);
+    copy.removeProperty('x-ical-aggregator-group');
+    return copy;
 }
 
 function clone(event) {
