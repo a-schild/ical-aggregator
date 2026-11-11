@@ -7,6 +7,11 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Added
+- New `group` field on `inputs[]` entries: when `mergeRooms` is enabled, bookings are only merged
+  with others from the same group. Inputs without a `group` each form their own group. This prevents
+  cross-building merges when a config set covers rooms in several buildings.
+
 ## [1.2.0] - 2026-10-29
 
 ### Added

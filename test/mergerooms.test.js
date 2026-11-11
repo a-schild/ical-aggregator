@@ -136,3 +136,30 @@ test('does not modify the input events', () => {
     assert.strictEqual(value(mergeRoomBookings(input)[0], 'location'), 'B, A');
     assert.strictEqual(value(input[0], 'location'), 'B');
 });
+
+test('group: merges bookings within the same group', () => {
+    const result = mergeRoomBookings([
+        booking('a@x', 'Foyer', { 'X-ICAL-AGGREGATOR-GROUP': 'bldA' }),
+        booking('b@x', 'Küche', { 'X-ICAL-AGGREGATOR-GROUP': 'bldA' })
+    ]);
+    assert.strictEqual(result.length, 1);
+    assert.strictEqual(value(result[0], 'location'), 'Foyer, Küche');
+    assert.strictEqual(value(result[0], 'x-ical-aggregator-group'), null, 'group tag must be removed');
+});
+
+test('group: keeps bookings of different groups separate', () => {
+    const result = mergeRoomBookings([
+        booking('a@x', 'Foyer', { 'X-ICAL-AGGREGATOR-GROUP': 'bldA' }),
+        booking('b@x', 'Saal',  { 'X-ICAL-AGGREGATOR-GROUP': 'bldB' })
+    ]);
+    assert.strictEqual(result.length, 2);
+    assert.deepStrictEqual(result.map((e) => value(e, 'location')), ['Foyer', 'Saal']);
+});
+
+test('group: single-event group has its tag removed', () => {
+    const result = mergeRoomBookings([
+        booking('a@x', 'Foyer', { 'X-ICAL-AGGREGATOR-GROUP': 'bldA' })
+    ]);
+    assert.strictEqual(result.length, 1);
+    assert.strictEqual(value(result[0], 'x-ical-aggregator-group'), null, 'group tag must be removed');
+});

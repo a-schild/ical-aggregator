@@ -34,5 +34,29 @@
         "output": {
             "fileName": "F:/x/calset2.ics"
         }
+    },
+    "config_calset3": {
+        "mergeRooms": true,
+        "roomNamesOnly": true,
+        "inputs": [
+            {
+                "src" : "https://server31/calendar.ics",
+                "description" : "Building A room 1",
+                "group": "buildingA"
+            },
+            {
+                "src" : "https://server32/calendar.ics",
+                "description" : "Building A room 2",
+                "group": "buildingA"
+            },
+            {
+                "src" : "https://server33/calendar.ics",
+                "description" : "Building B room 1",
+                "group": "buildingB"
+            }
+        ],
+        "output": {
+            "fileName": "F:/x/calset3.ics"
+        }
     }
 }
