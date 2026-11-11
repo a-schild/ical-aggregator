@@ -7,6 +7,8 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-11
+
 ### Added
 - New `group` field on `inputs[]` entries: when `mergeRooms` is enabled, bookings are only merged
   with others from the same group. Inputs without a `group` each form their own group. This prevents
